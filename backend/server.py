@@ -48,5 +48,9 @@ def get_home_price_by_zip():
         response = { "exists": False }
     return jsonify(response)
 
+@app.route("/")
+def index():
+    return "Team 40 API"
+
 if __name__ == "__main__":
     app.run(port=8000, debug=True)
