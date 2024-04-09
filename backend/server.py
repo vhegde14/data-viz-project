@@ -50,7 +50,7 @@ def get_home_price_by_zip():
 
 @app.route("/")
 def index():
-    return "CSE 6242 Project"
+    return "CSE 6242 Project - API"
 
 if __name__ == "__main__":
     app.run()
