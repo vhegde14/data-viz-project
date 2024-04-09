@@ -50,7 +50,7 @@ def get_home_price_by_zip():
 
 @app.route("/")
 def index():
-    return "Team 40 API"
+    return "Team 40 - Data Viz"
 
 if __name__ == "__main__":
     app.run()
