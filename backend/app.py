@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+
 import pandas as pd
 import ast
 
@@ -8,6 +10,8 @@ region_column = 'RegionName'
 current_price_column = '2024-02-29'
 
 app = Flask(__name__)
+
+CORS(app)
 
 @app.route("/get_home_price_by_zip", methods=["POST"])
 def get_home_price_by_zip():
