@@ -13,30 +13,28 @@ app = Flask(__name__)
 
 CORS(app)
 
-@app.route("/get_home_price_by_zip", methods=["POST"])
-def get_home_price_by_zip():
+# Define the DataFrame
+data = pd.read_csv("updated_data.csv")
+
+# Define a function to parse the string into a list (handle potential errors)
+def parse_list(value_str):
+    if not value_str or pd.isna(value_str):
+        return []
     try:
-        # Get the value from the request body
+        parsed_list = ast.literal_eval(value_str)
+        cleaned_list = [s.strip("'") for s in parsed_list]
+        return cleaned_list
+    except (ValueError, SyntaxError):
+        return []  # Return empty list on parsing errors
+
+data[value_column] = data[value_column].apply(parse_list)
+
+@app.route("/get_latest_home_price_by_zip", methods=["POST"])
+def get_latest_home_price_by_zip():
+    try:
         search_value = request.json["value"]
     except KeyError:
         return jsonify({"error": "Missing 'value' field in request body"}), 400
-    
-    # Define the DataFrame
-    data = pd.read_csv("updated_data.csv")
-    
-    # Define a function to parse the string into a list (handle potential errors)
-    def parse_list(value_str):
-        print(value_str, type(value_str))
-        if not value_str or pd.isna(value_str):
-            return []
-        try:
-            parsed_list = ast.literal_eval(value_str)
-            cleaned_list = [s.strip("'") for s in parsed_list]
-            return cleaned_list
-        except (ValueError, SyntaxError):
-            return []  # Return empty list on parsing errors
-    
-    data[value_column] = data[value_column].apply(parse_list)
     
     mask = data[value_column].apply(lambda x: isinstance(x, list) and search_value in x)
     filtered_df = data.loc[mask & (data.index > 0)]
@@ -47,6 +45,28 @@ def get_home_price_by_zip():
             "exists": True,
             "region_name": matched_row[region_column],
             "current_price": matched_row[current_price_column]
+        }
+    else:
+        response = { "exists": False }
+    return jsonify(response)
+
+@app.route("/get_all_home_prices_by_zip", methods=["POST"])
+def get_all_home_prices_by_zip():
+    try:
+        search_value = request.json["value"]
+    except KeyError:
+        return jsonify({"error": "Missing 'value' field in request body"}), 400
+    
+    mask = data[value_column].apply(lambda x: isinstance(x, list) and search_value in x)
+    filtered_df = data.loc[mask & (data.index > 0)]
+
+    if not filtered_df.empty:
+        matched_row = filtered_df.iloc[0]
+        prices = matched_row[6:].tolist()
+        response = {
+            "exists": True,
+            "region_name": matched_row[region_column],
+            "prices": prices
         }
     else:
         response = { "exists": False }
