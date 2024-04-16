@@ -29,6 +29,60 @@ def parse_list(value_str):
 
 data[value_column] = data[value_column].apply(parse_list)
 
+state_abbreviations_to_names = {
+    'AL': 'Alabama',
+    'AK': 'Alaska',
+    'AZ': 'Arizona',
+    'AR': 'Arkansas',
+    'CA': 'California',
+    'CO': 'Colorado',
+    'CT': 'Connecticut',
+    'DE': 'Delaware',
+    'FL': 'Florida',
+    'GA': 'Georgia',
+    'HI': 'Hawaii',
+    'ID': 'Idaho',
+    'IL': 'Illinois',
+    'IN': 'Indiana',
+    'IA': 'Iowa',
+    'KS': 'Kansas',
+    'KY': 'Kentucky',
+    'LA': 'Louisiana',
+    'ME': 'Maine',
+    'MD': 'Maryland',
+    'MA': 'Massachusetts',
+    'MI': 'Michigan',
+    'MN': 'Minnesota',
+    'MS': 'Mississippi',
+    'MO': 'Missouri',
+    'MT': 'Montana',
+    'NE': 'Nebraska',
+    'NV': 'Nevada',
+    'NH': 'New Hampshire',
+    'NJ': 'New Jersey',
+    'NM': 'New Mexico',
+    'NY': 'New York',
+    'NC': 'North Carolina',
+    'ND': 'North Dakota',
+    'OH': 'Ohio',
+    'OK': 'Oklahoma',
+    'OR': 'Oregon',
+    'PA': 'Pennsylvania',
+    'RI': 'Rhode Island',
+    'SC': 'South Carolina',
+    'SD': 'South Dakota',
+    'TN': 'Tennessee',
+    'TX': 'Texas',
+    'UT': 'Utah',
+    'VT': 'Vermont',
+    'VA': 'Virginia',
+    'WA': 'Washington',
+    'WV': 'West Virginia',
+    'WI': 'Wisconsin',
+    'WY': 'Wyoming'
+}
+
+
 @app.route("/get_latest_home_price_by_zip", methods=["POST"])
 def get_latest_home_price_by_zip():
     try:
@@ -71,6 +125,18 @@ def get_all_home_prices_by_zip():
     else:
         response = { "exists": False }
     return jsonify(response)
+
+@app.route("/get_state_average_prices_by_year", methods=["POST"])
+def get_state_average_prices():
+    try:
+        year = request.json["value"]
+    except KeyError:
+        return jsonify({"error": "Missing 'value' field in request body"}), 400
+    priceData = {}
+    for state in state_abbreviations_to_names.keys():
+        price = data[data['StateName'] == state].iloc[:][f'{year}-01-31'].mean()
+        priceData[state_abbreviations_to_names[state]] = price
+    return jsonify(priceData)
 
 @app.route("/")
 def index():
