@@ -69,9 +69,9 @@ function PriceTrendPage() {
         };
         try {
             // local testing
-            const response = await fetch('http://127.0.0.1:5000/get_all_home_prices_by_zip', requestOptions);
+            // const response = await fetch('http://127.0.0.1:5000/get_all_home_prices_by_zip', requestOptions);
             // production
-            // const response = await fetch('https://data-viz-project-ajba.onrender.com/get_all_home_prices_by_zip', requestOptions);
+            const response = await fetch('https://data-viz-project-ajba.onrender.com/get_all_home_prices_by_zip', requestOptions);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
