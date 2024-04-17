@@ -3,6 +3,7 @@ from flask_cors import CORS
 
 import pandas as pd
 import ast
+import numpy as np
 
 # Define the column containing the list-like values
 value_column = 'Zipcodes'
@@ -127,20 +128,22 @@ def get_all_home_prices_by_zip():
     return jsonify(response)
 
 @app.route("/get_state_average_prices_by_year", methods=["POST"])
-def get_state_average_prices():
-    try:
-        year = request.json["value"]
-    except KeyError:
-        return jsonify({"error": "Missing 'value' field in request body"}), 400
-    priceData = {}
-    for state in state_abbreviations_to_names.keys():
-        price = data[data['StateName'] == state].iloc[:][f'{year}-01-31'].mean()
-        priceData[state_abbreviations_to_names[state]] = price
-    return jsonify(priceData)
+def get_state_average_prices_by_year():
+    final_data = {}
+    for year in range(2000, 2025):                
+        priceData = {}
+        for state in state_abbreviations_to_names.keys():
+            price = data[data['StateName'] == state].iloc[:][f'{year}-01-31'].mean()
+            if np.isnan(price):
+                price = 0
+            priceData[state_abbreviations_to_names[state]] = price
+        final_data[year] = priceData
+    print('here')
+    return jsonify(final_data)
 
 @app.route("/")
 def index():
     return "CSE 6242 Project - API"
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
