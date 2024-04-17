@@ -36,7 +36,9 @@ const MapChart = () => {
 
     const handleChange = (event) => {
         setYear(event.target.value);
-        setMapData(priceData[event.target.value]);
+        if (priceData) {
+            setMapData(priceData[event.target.value]);
+        }
     };
 
     const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas/states-10m.json";
