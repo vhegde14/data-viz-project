@@ -4,6 +4,7 @@ from flask_cors import CORS
 import pandas as pd
 import ast
 import numpy as np
+import joblib
 
 # Define the column containing the list-like values
 value_column = 'Zipcodes'
@@ -13,6 +14,9 @@ current_price_column = '2024-02-29'
 app = Flask(__name__)
 
 CORS(app)
+
+model = joblib.load('model.pkl')
+scaler = joblib.load('scaler.pkl')
 
 # Define the DataFrame
 data = pd.read_csv("updated_data.csv")
@@ -140,6 +144,30 @@ def get_state_average_prices_by_year():
         final_data[year] = priceData
     print('here')
     return jsonify(final_data)
+
+@app.route("/get_price_prediction", methods=["POST"])
+def get_price_prediction():
+    try:
+        air_conditioning = 1 if request.json['airConditioning'] == 'Yes' else 0
+        area = 1 if request.json['area'] == 'Yes' else 0
+        bathrooms = request.json['bathrooms']
+        hotWaterHeating = 1 if request.json['hotWaterHeating'] == 'Yes' else 0
+        parkingSpots = request.json['parkingSpots']
+        stories = request.json['stories']
+    except KeyError:
+        return jsonify({"error": "Missing 'value' field in request body"}), 400
+    input = pd.DataFrame({'const': [1], 'bathrooms': [float(bathrooms)], 'stories': [float(stories)], 'hotwaterheating': [float(hotWaterHeating)],
+                       'parking': [float(parkingSpots)], 'airconditioning': [float(air_conditioning)], 'prefarea': [float(area)]})
+    input['stories'] = (input['stories'] - scaler.data_min_[0]) / (scaler.data_max_[0] - scaler.data_min_[0])
+    input['bathrooms'] = (input['bathrooms'] - scaler.data_min_[0]) / (scaler.data_max_[0] - scaler.data_min_[0])
+    input['airconditioning'] = (input['airconditioning'] - scaler.data_min_[0]) / (scaler.data_max_[0] - scaler.data_min_[0])
+    input['prefarea'] = (input['prefarea'] - scaler.data_min_[0]) / (scaler.data_max_[0] - scaler.data_min_[0])
+    input['parking'] = (input['parking'] - scaler.data_min_[0]) / (scaler.data_max_[0] - scaler.data_min_[0])
+    prediction = model.predict(input)
+    min_value = scaler.data_min_[-1]
+    max_value = scaler.data_max_[-1]
+    output = prediction.to_numpy()[0] * (max_value - min_value) + min_value
+    return jsonify({'price': output})
 
 @app.route("/")
 def index():
