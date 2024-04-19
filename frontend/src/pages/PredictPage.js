@@ -37,7 +37,7 @@ function Form() {
     console.log('Submitting form', formData);
     // Example POST request
     try {
-      const response = await fetch('http://127.0.0.1:5000/get_price_prediction', {
+      const response = await fetch('https://data-viz-project-ajba.onrender.com/get_price_prediction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -169,7 +169,6 @@ function PredictPage() {
     return (
         <div className='App'>
             <div className="App-header">
-                <p>Predict House Prices</p>
                 <Form />
             </div>
         </div>
