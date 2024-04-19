@@ -26,3 +26,4 @@ urllib3==2.2.1
 virtualenv==20.25.1
 Werkzeug==3.0.2
 joblib==1.4.0
+statsmodels==0.14.1
