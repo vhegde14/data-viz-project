@@ -27,4 +27,4 @@ virtualenv==20.25.1
 Werkzeug==3.0.2
 joblib==1.4.0
 statsmodels==0.14.1
-sklearn==1.4.2
+sklearn==1.3.2
